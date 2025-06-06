@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Technique OPUS</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        
+        .architecture {
+            padding: 40px;
+        }
+        
+        .layer {
+            margin-bottom: 30px;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .layer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--layer-color);
+        }
+        
+        .layer-user { 
+            background: linear-gradient(135deg, #74b9ff20 0%, #0984e320 100%);
+            --layer-color: #74b9ff;
+        }
+        
+        .layer-security { 
+            background: linear-gradient(135deg, #e1734620 0%, #d6336c20 100%);
+            --layer-color: #e17346;
+        }
+        
+        .layer-api { 
+            background: linear-gradient(135deg, #00b89420 0%, #00a08520 100%);
+            --layer-color: #00b894;
+        }
+        
+        .layer-services { 
+            background: linear-gradient(135deg, #fdcb6e20 0%, #e17d0420 100%);
+            --layer-color: #fdcb6e;
+        }
+        
+        .layer-data { 
+            background: linear-gradient(135deg, #6c5ce720 0%, #a29bfe20 100%);
+            --layer-color: #6c5ce7;
+        }
+        
+        .layer-infrastructure { 
+            background: linear-gradient(135deg, #55a3ff20 0%, #003d8220 100%);
+            --layer-color: #55a3ff;
+        }
+        
+        .layer-iot { 
+            background: linear-gradient(135deg, #26de8120 0%, #00b89420 100%);
+            --layer-color: #26de81;
+        }
+        
+        .layer-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+        }
+        
+        .layer-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--layer-color);
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .component {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--layer-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+        
+        .component-title {
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .component-desc {
+            color: #636e72;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .tech-badge {
+            background: var(--layer-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        
+        .data-flow {
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .flow-arrow {
+            font-size: 2em;
+            color: #74b9ff;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .metrics {
+            background: linear-gradient(135deg, #00b89420 0%, #00a08520 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .metrics-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 20px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .metric {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #00b894;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #636e72;
+            font-size: 0.9em;
+        }
+        
+        .legend {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .legend-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.95em;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏙️ Architecture Technique OPUS</h1>
+            <p>Plateforme d'Optimisation des Flux Routiers par IA - Smart City Solutions</p>
+        </div>
+        
+        <div class="architecture">
+            <!-- Couche Utilisateurs -->
+            <div class="layer layer-user">
+                <div class="layer-title">
+                    <div class="layer-icon">👥</div>
+                    Interfaces Utilisateurs
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">Dashboard Web Gestionnaires</div>
+                        <div class="component-desc">Interface de pilotage temps réel pour les collectivités avec cartographie interactive, KPIs et gestion des feux</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">React</span>
+                            <span class="tech-badge">D3.js</span>
+                            <span class="tech-badge">WebSockets</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Application Mobile Citoyens</div>
+                        <div class="component-desc">Navigation optimisée, info trafic temps réel, signalement incidents et services multimodaux</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">React Native</span>
+                            <span class="tech-badge">Maps API</span>
+                            <span class="tech-badge">Push Notifications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche Sécurité -->
+            <div class="layer layer-security">
+                <div class="layer-title">
+                    <div class="layer-icon">🛡️</div>
+                    Sécurité & Orchestration (XSOAR + XDR)
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">XSOAR Platform</div>
+                        <div class="component-desc">Orchestration automatisée des incidents de sécurité avec 350+ connecteurs et playbooks Smart City</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">SOAR</span>
+                            <span class="tech-badge">Playbooks</span>
+                            <span class="tech-badge">API Integration</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">XDR Detection</div>
+                        <div class="component-desc">Détection étendue multi-sources (endpoints, réseau, IoT) avec IA comportementale</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Behavioral AI</span>
+                            <span class="tech-badge">Multi-vector</span>
+                            <span class="tech-badge">Zero-Trust</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">SOC 24/7</div>
+                        <div class="component-desc">Centre d'opérations sécurité avec surveillance continue et réponse automatisée aux menaces</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">SIEM</span>
+                            <span class="tech-badge">Incident Response</span>
+                            <span class="tech-badge">Threat Intel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche API -->
+            <div class="layer layer-api">
+                <div class="layer-title">
+                    <div class="layer-icon">🔗</div>
+                    API Gateway & Authentification
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">API Gateway</div>
+                        <div class="component-desc">Point d'entrée unique avec rate limiting, authentification et routing intelligent</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Kong</span>
+                            <span class="tech-badge">OAuth 2.0</span>
+                            <span class="tech-badge">Rate Limiting</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Authentification Multi-Facteurs</div>
+                        <div class="component-desc">Sécurisation des accès avec SSO, MFA et gestion granulaire des permissions</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">JWT</span>
+                            <span class="tech-badge">LDAP</span>
+                            <span class="tech-badge">RBAC</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche Services -->
+            <div class="layer layer-services">
+                <div class="layer-title">
+                    <div class="layer-icon">⚙️</div>
+                    Microservices Métier
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">Moteur IA Prédictif</div>
+                        <div class="component-desc">Algorithmes ML propriétaires avec 95% de précision, réseaux de neurones et algorithmes génétiques</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">TensorFlow</span>
+                            <span class="tech-badge">PyTorch</span>
+                            <span class="tech-badge">Scikit-learn</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Optimiseur de Feux</div>
+                        <div class="component-desc">Gestion intelligente des cycles de feux avec optimisation temps réel et coordination intersections</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Genetic Algorithms</span>
+                            <span class="tech-badge">Graph Theory</span>
+                            <span class="tech-badge">Real-time</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Service de Routage</div>
+                        <div class="component-desc">Calcul d'itinéraires optimisés avec évitement congestion et intégration multimodale</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Dijkstra</span>
+                            <span class="tech-badge">A*</span>
+                            <span class="tech-badge">Multimodal</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Analytics & Reporting</div>
+                        <div class="component-desc">Génération automatique de rapports avec KPIs environnementaux et ROI</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Power BI</span>
+                            <span class="tech-badge">Grafana</span>
+                            <span class="tech-badge">Custom Reports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche Données -->
+            <div class="layer layer-data">
+                <div class="layer-title">
+                    <div class="layer-icon">🗄️</div>
+                    Traitement & Stockage des Données
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">Streaming & Messaging</div>
+                        <div class="component-desc">Ingestion temps réel de millions d'événements IoT avec Apache Kafka</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Apache Kafka</span>
+                            <span class="tech-badge">Apache Spark</span>
+                            <span class="tech-badge">Redis</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Time Series Database</div>
+                        <div class="component-desc">Stockage optimisé des séries temporelles de trafic avec InfluxDB</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">InfluxDB</span>
+                            <span class="tech-badge">Chronograf</span>
+                            <span class="tech-badge">Kapacitor</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Search & Analytics</div>
+                        <div class="component-desc">Recherche et analyse des logs avec indexation full-text via Elasticsearch</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Elasticsearch</span>
+                            <span class="tech-badge">Kibana</span>
+                            <span class="tech-badge">Logstash</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Data Lake</div>
+                        <div class="component-desc">Stockage massif des données historiques pour entraînement IA</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Azure Data Lake</span>
+                            <span class="tech-badge">Parquet</span>
+                            <span class="tech-badge">Delta Lake</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche Infrastructure -->
+            <div class="layer layer-infrastructure">
+                <div class="layer-title">
+                    <div class="layer-icon">☁️</div>
+                    Infrastructure Cloud Hybride
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">Cloud Public (Azure/AWS)</div>
+                        <div class="component-desc">Scalabilité automatique et services managés pour traitement IA haute performance</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Kubernetes</span>
+                            <span class="tech-badge">Auto-scaling</span>
+                            <span class="tech-badge">Load Balancer</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Cloud Privé (OVH)</div>
+                        <div class="component-desc">Souveraineté des données et conformité RGPD avec contrôle total</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">OpenStack</span>
+                            <span class="tech-badge">RGPD</span>
+                            <span class="tech-badge">Sovereign Cloud</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Edge Computing</div>
+                        <div class="component-desc">Traitement local pour latence ultra-faible (<50ms) et résilience</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">K3s</span>
+                            <span class="tech-badge">Edge AI</span>
+                            <span class="tech-badge">Local Processing</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">DevOps & CI/CD</div>
+                        <div class="component-desc">Automatisation complète avec GitHub Actions, Docker et monitoring continu</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Docker</span>
+                            <span class="tech-badge">GitHub Actions</span>
+                            <span class="tech-badge">Prometheus</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-flow">
+                <div class="flow-arrow">⬇️</div>
+            </div>
+
+            <!-- Couche IoT -->
+            <div class="layer layer-iot">
+                <div class="layer-title">
+                    <div class="layer-icon">📡</div>
+                    Infrastructure IoT & Capteurs
+                </div>
+                <div class="components">
+                    <div class="component">
+                        <div class="component-title">Caméras IA</div>
+                        <div class="component-desc">Détection et classification véhicules avec Computer Vision et edge processing</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">OpenCV</span>
+                            <span class="tech-badge">YOLO</span>
+                            <span class="tech-badge">Edge AI</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Capteurs Magnétiques</div>
+                        <div class="component-desc">Comptage précis et mesure vitesse avec transmission LoRaWAN</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">LoRaWAN</span>
+                            <span class="tech-badge">Low Power</span>
+                            <span class="tech-badge">Long Range</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Feux Intelligents</div>
+                        <div class="component-desc">Adaptation dynamique des cycles avec communication mesh et gestion énergétique</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Mesh Network</span>
+                            <span class="tech-badge">4G/5G</span>
+                            <span class="tech-badge">Energy Saving</span>
+                        </div>
+                    </div>
+                    <div class="component">
+                        <div class="component-title">Capteurs Environnementaux</div>
+                        <div class="component-desc">Qualité air, bruit, météo pour optimisation multicritère</div>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Multi-sensor</span>
+                            <span class="tech-badge">Environmental</span>
+                            <span class="tech-badge">Real-time</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métriques Performance -->
+            <div class="metrics">
+                <div class="metrics-title">📊 Performances Système</div>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">95%</div>
+                        <div class="metric-label">Précision IA Prédictive</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">&lt;50ms</div>
+                        <div class="metric-label">Latence Edge Computing</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">99.9%</div>
+                        <div class="metric-label">Disponibilité Service</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">1M+</div>
+                        <div class="metric-label">Événements IoT/jour</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">15%</div>
+                        <div class="metric-label">Réduction Temps Trajet</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">20%</div>
+                        <div class="metric-label">Économie Énergie Feux</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Légende -->
+            <div class="legend">
+                <div class="legend-title">🔧 Conformité & Standards</div>
+                <div class="legend-grid">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e17346;"></div>
+                        <span><strong>ISO 27001</strong> - Management Sécurité Information</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #74b9ff;"></div>
+                        <span><strong>RGPD</strong> - Protection Données Personnelles</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #00b894;"></div>
+                        <span><strong>ITS Standards</strong> - Systèmes Transport Intelligents</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6c5ce7;"></div>
+                        <span><strong>ANSSI</strong> - Cybersécurité Française</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
